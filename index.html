@@ -39,7 +39,6 @@ body{
 .rack{max-width:770px;margin:0 auto;position:relative;
   background:linear-gradient(180deg,var(--chassis-2),var(--chassis));
   border:1px solid #000;
-  padding-bottom:10px;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 26px 70px rgba(0,0,0,.66)}
 .screw{position:absolute;width:11px;height:11px;border-radius:50%;
   background:radial-gradient(circle at 35% 30%,#6e6559,#2a251f 70%);
@@ -66,6 +65,9 @@ body{
     repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 3px),
     linear-gradient(180deg,var(--panel-hi) 0%,var(--panel) 44%,var(--panel-lo) 100%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(0,0,0,.28),0 6px 20px rgba(0,0,0,.45)}
+.lede{margin:-4px 0 18px;max-width:62ch;color:var(--ink-2);font-size:13.5px;line-height:1.5}
+.foot{padding:15px 34px 19px;font:400 10.5px/1.6 "Space Mono",monospace;
+  letter-spacing:.06em;color:#6f6656;border-top:1px solid #000}
 .silk{font:700 10px/1 "Saira Condensed",sans-serif;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-2)}
 .rule{height:1px;background:rgba(32,25,13,.3);margin:12px 0 16px}
 h1{font:700 33px/1.05 "Saira Condensed",sans-serif;letter-spacing:.03em;text-transform:uppercase;margin:12px 0 10px}
@@ -141,6 +143,8 @@ td a{color:var(--ink)}
   body{padding:14px 8px 44px}
   .chassis{padding:16px 20px;gap:12px}.panel{margin:12px;padding:20px 15px}
   .badge-name{font-size:18px}h1{font-size:26px}
+  .foot{padding:13px 20px 16px}
+  .lede{font-size:13px}
   .cliplabel{width:42px;letter-spacing:.14em}.time{min-width:70px;font-size:10px}
   td.delta,th.tnum{display:none}
   .biasval{font-size:23px}
@@ -165,25 +169,11 @@ td a{color:var(--ink)}
     <div class="counter" id="counter">STANDBY</div>
   </header>
 
-  <!-- INTRO -->
-  <section class="panel" id="s-intro">
-    <div class="silk">Operating instructions</div>
-    <h1>Can you actually hear the guitar?</h1>
-    <p>Ten instruments, drawn at random from <span class="mono" id="poolsize">—</span> electric guitars.
-       Each one comes with its full set of factory clips, played through the same rig on the same
-       standardised performance — so the only variable is the instrument.</p>
-    <p>Listen, then name it from five candidates — all from the same maker. Epiphone counts
-       as Gibson and Squier as Fender, because those are the same designs built to a budget,
-       so the badge tells you nothing. Nothing identifies the clips, and the answer is revealed
-       only once you have committed to it.</p>
-    <p class="dim">Pure guessing scores 2 out of 10. The meter at the end shows where you landed
-       against that line, and whether the gap is large enough to mean anything.</p>
-    <button class="btn" id="start">Begin test</button>
-  </section>
-
   <!-- TEST -->
   <section class="panel" id="s-test" hidden>
     <div class="leds" id="leds" aria-label="Progress"></div>
+    <div class="lede">Name the guitar from its clips. All five candidates are the same
+       maker — Epiphone counts as Gibson, Squier as Fender. Guessing averages 2 of 10.</div>
     <div class="silk">Unit under test — listen</div>
     <div class="rule"></div>
     <div id="clips"></div>
@@ -212,6 +202,8 @@ td a{color:var(--ink)}
     </table>
     <button class="btn" id="again">Run another test</button>
   </section>
+
+  <footer class="foot">Recordings are cross-linked from Thomann</footer>
 </div>
 
 <script>
@@ -228,7 +220,6 @@ const BY_FAM = POOL.reduce((m,g)=>((m[fam(g)] = m[fam(g)] || []).push(g), m), {}
 // a round needs the answer plus four same-family decoys
 const ELIGIBLE = POOL.filter(g => BY_FAM[fam(g)].length >= N_OPTS);
 
-document.getElementById('poolsize').textContent = ELIGIBLE.length;
 
 const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
 const fmt = t => (isFinite(t)? Math.floor(t/60)+":"+String(Math.floor(t%60)).padStart(2,"0") : "0:00");
@@ -426,13 +417,14 @@ function showResult(){
   });
 }
 
-function startTest(){
+function startTest(scroll){
   rounds=buildRounds(); idx=0; picks=[];
-  $('#s-intro').hidden=true; $('#s-result').hidden=true; $('#s-test').hidden=false;
-  renderRound(); window.scrollTo({top:0,behavior:'smooth'});
+  $('#s-result').hidden=true; $('#s-test').hidden=false;
+  renderRound();
+  if(scroll!==false) window.scrollTo({top:0,behavior:'smooth'});
 }
-$('#start').onclick=startTest;
-$('#again').onclick=startTest;
+$('#again').onclick=()=>startTest();
+startTest(false);
 </script>
 </body>
 </html>
