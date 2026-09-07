@@ -29,6 +29,8 @@ the set. Two clips sharing a riff name are not automatically a fair comparison: 
 45% of same-riff pairs share an amplifier.
 
 The A/B test therefore pairs a guitar only with one that played the same riff through the
-same amp, which leaves 821 usable pairs. Both pages show each clip's full recording chain
+same amp, and within 10 seconds of the same length — a wider gap than that means it is not
+really the same performance (the worst was 60 seconds apart). That leaves 771 usable pairs.
+Both pages show each clip's full recording chain
 — effects, amp, cab, mic, preamp, interface, software — behind the info button on the clip
 row, so you can check for yourself.
