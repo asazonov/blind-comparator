@@ -217,7 +217,7 @@ td a{color:var(--ink)}
 
   <section class="panel" id="s-test">
     <div class="leds" id="leds" aria-label="Progress"></div>
-    <div class="silk">Same riff, one guitar each &mdash; <span class="riff" id="riff"></span></div>
+    <div class="silk">Same riff, same amp, one guitar each &mdash; <span class="riff" id="riff"></span></div>
     <div class="rule"></div>
     <div id="clips"></div>
     <div id="pick"></div>
@@ -274,14 +274,22 @@ function pctTxt(p){const v=p*100;
   return v>=1 ? v.toFixed(1)+'%' : v>=0.1 ? v.toFixed(2)+'%'
        : v>=0.001 ? v.toFixed(3)+'%' : 'under 0.001%';}
 
-// same body style, different maker, a real price gap, and one riff they both played
+// Thomann records each product on its own rig, and 'reamped' is false on almost
+// every clip — so without this the test would compare amps, not guitars. A riff
+// only counts when both guitars played it through the same amplifier.
+const AMP = ROLES.indexOf('Amplifier');
+const ampOf = clip => { const p=(clip[2]||[]).find(q=>q[0]===AMP); return p?p[1]:null; };
 const PAIRS = [];
 for(let i=0;i<G.length;i++) for(let j=i+1;j<G.length;j++){
   const a=G[i], b=G[j];
   if(a.st!==b.st || a.b===b.b) continue;
   const hi = a.eur>b.eur ? i : j, lo = a.eur>b.eur ? j : i;
   if(G[lo].eur<=0 || G[hi].eur/G[lo].eur < MIN_RATIO) continue;
-  const riffs = Object.keys(G[hi].c).filter(k => k in G[lo].c);
+  const riffs = Object.keys(G[hi].c).filter(k=>{
+    if(!(k in G[lo].c)) return false;
+    const a=ampOf(G[hi].c[k]), b=ampOf(G[lo].c[k]);
+    return a!==null && a===b;
+  });
   if(riffs.length) PAIRS.push({hi,lo,riffs});
 }
 
@@ -402,7 +410,8 @@ function answer(){
     '<div class="reveal"><h2>'+(ok?'Correct':'Other way round')+'</h2>'+
     '<div style="margin:2px 0 8px">Clip A was the <strong>'+nm(cA)+'</strong> ('+px(cA)+'), '+
     'clip B the <strong>'+nm(cB)+'</strong> ('+px(cB)+').</div>'+
-    '<div class="spec">'+r.hi.st+' · '+picks[idx].ratio.toFixed(1)+'× apart · '+
+    '<div class="spec">'+r.hi.st+' · both through a '+GEAR[ampOf(r.hi.c[r.riff])]+
+    ' · '+picks[idx].ratio.toFixed(1)+'× apart · '+
     '<a href="'+r.hi.url+'" target="_blank" rel="noopener">'+nm(r.hi)+' ↗</a> · '+
     '<a href="'+r.lo.url+'" target="_blank" rel="noopener">'+nm(r.lo)+' ↗</a></div>'+
     '<button class="btn" id="next">'+(idx===N_ROUNDS-1?'See report':'Next pair')+'</button></div>';
