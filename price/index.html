@@ -86,11 +86,11 @@ p{margin:0 0 12px;max-width:60ch}
 .clipwrap{margin-top:7px}
 .clip{display:flex;align-items:center;gap:13px;padding:10px 12px;
   border:1px solid rgba(32,25,13,.26);background:rgba(255,255,255,.11)}
-.info{width:23px;height:23px;flex:none;padding:0;cursor:pointer;border-radius:50%;
-  border:1px solid rgba(32,25,13,.45);background:transparent;color:var(--ink-2);
-  font:700 12px/1 "Space Mono",monospace}
-.info:hover{background:rgba(32,25,13,.13);color:var(--ink)}
-.info.on{background:var(--ink);color:var(--panel-hi);border-color:var(--ink)}
+.info{width:25px;height:25px;flex:none;padding:0;cursor:pointer;border-radius:50%;
+  border:1px solid #000;background:linear-gradient(180deg,#3d362b,#1c1812);
+  color:var(--cream);font:700 13px/1 "Space Mono",monospace}
+.info:hover{background:linear-gradient(180deg,#4d4335,#252017)}
+.info.on{background:linear-gradient(180deg,#9dbd76,#6d8f4a);color:#111806;border-color:#4a6630}
 .info:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .gear{padding:10px 12px 11px;border:1px solid rgba(32,25,13,.26);border-top:0;
   background:rgba(32,25,13,.07)}
@@ -190,6 +190,8 @@ td a{color:var(--ink)}
 .assign.wrong{background:linear-gradient(180deg,#e5806d,#c4402a);color:#2b0c07}
 .assign.correct .sw,.assign.wrong .sw,.assign.correct .ap,.assign.wrong .ap{color:inherit;opacity:.8}
 .chan .clipwrap{flex:1;min-width:0;margin-top:0}
+.chan .time{min-width:66px}
+.chan .info{margin-left:2px}
 .riff{font:700 10px/1 "Saira Condensed",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--ink)}
 @media (max-width:560px){
   .mhead{display:none}
@@ -250,6 +252,7 @@ const N_ROUNDS = 12, MIN_RATIO = 2.5;
 const $ = s => document.querySelector(s);
 const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
 const fmt = t => (isFinite(t)? Math.floor(t/60)+":"+String(Math.floor(t%60)).padStart(2,"0") : "0:00");
+const ftot = d => (d && isFinite(d)) ? fmt(d) : '--:--';
 const cur = n => n.toLocaleString('en-US');
 const nm  = g => g.b+' '+g.m;
 const money = g => '\u2248 \u20ac'+cur(g.eur)+' / $'+cur(g.usd);
@@ -312,14 +315,15 @@ function clipRow(letter, clip){
   const track=document.createElement('div'); track.className='track'; track.tabIndex=0;
   track.setAttribute('role','slider'); track.setAttribute('aria-label','Seek clip '+letter);
   const fill=document.createElement('div'); fill.className='fill'; track.appendChild(fill);
-  const time=document.createElement('span'); time.className='time'; time.textContent='0:00 / '+fmt(dur);
+  const time=document.createElement('span'); time.className='time'; time.textContent='0:00 / '+ftot(dur);
+  audio.onloadedmetadata=()=>{ time.textContent=fmt(audio.currentTime)+' / '+ftot(audio.duration||dur); };
   btn.onclick=()=>{ if(audio.paused){ stopAll(audio); audio.play(); } else audio.pause(); };
   audio.onplay =()=>{ btn.textContent='\u2016'; lampSync(); };
   audio.onpause=()=>{ btn.textContent='\u25b6'; lampSync(); };
   audio.onended=()=>{ btn.textContent='\u25b6'; fill.style.width='0%'; lampSync(); };
   audio.ontimeupdate=()=>{ const d=audio.duration||dur;
     fill.style.width=(100*audio.currentTime/d)+'%';
-    time.textContent=fmt(audio.currentTime)+' / '+fmt(d); };
+    time.textContent=fmt(audio.currentTime)+' / '+ftot(d); };
   const seek=e=>{ const r=track.getBoundingClientRect(), d=audio.duration||dur;
     audio.currentTime=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*d; };
   track.onclick=seek;
