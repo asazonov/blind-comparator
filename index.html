@@ -65,6 +65,9 @@ body{
     repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 3px),
     linear-gradient(180deg,var(--panel-hi) 0%,var(--panel) 44%,var(--panel-lo) 100%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(0,0,0,.28),0 6px 20px rgba(0,0,0,.45)}
+.xlink{padding:15px 34px 19px;font:400 10.5px/1.6 "Space Mono",monospace;
+  letter-spacing:.06em;color:#6f6656;border-top:1px solid #000}
+.xlink a{color:#8d8471}
 .foot{padding:15px 34px 19px;font:400 10.5px/1.6 "Space Mono",monospace;
   letter-spacing:.06em;color:#6f6656;border-top:1px solid #000}
 .silk{font:700 10px/1 "Saira Condensed",sans-serif;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-2)}
@@ -142,7 +145,7 @@ td a{color:var(--ink)}
   body{padding:14px 8px 44px}
   .chassis{padding:16px 20px;gap:12px}.panel{margin:12px;padding:20px 15px}
   .badge-name{font-size:18px}h1{font-size:26px}
-  .foot{padding:13px 20px 16px}
+  .foot,.xlink{padding:13px 20px 16px}
   .cliplabel{width:42px;letter-spacing:.14em}.time{min-width:70px;font-size:10px}
   td.delta,th.tnum{display:none}
   .biasval{font-size:23px}
@@ -201,6 +204,7 @@ td a{color:var(--ink)}
 
   <footer class="foot">Recordings are cross-linked from Thomann<br>
     No need to take any of this too seriously.</footer>
+  <div class="xlink">Also: <a href="price/">the expensive-or-cheap test</a></div>
 </div>
 
 <script>
