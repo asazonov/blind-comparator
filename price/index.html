@@ -12,7 +12,7 @@
 
   gtag('config', 'G-SZSMEBMGKK');
 </script>
-<title>Price Test PT-12 &mdash; Expensive or Cheap</title>
+<title>A/B Comparator AB-12 &mdash; Which Is Which</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Saira+Condensed:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -156,17 +156,10 @@ td a{color:var(--ink)}
 }
 
 
-.lineup{margin:0 0 4px}
-.gtr{display:flex;align-items:baseline;gap:12px;padding:9px 12px;margin-top:7px;
-  border:1px solid rgba(32,25,13,.26);background:rgba(255,255,255,.11)}
-.gtr-name{flex:1;font:500 15px/1.3 Barlow,sans-serif}
-.gtr-name b{font-weight:600}
-.gtr-price{font:400 11.5px/1 "Space Mono",monospace;color:var(--ink-2);white-space:nowrap}
+.opt .price{float:right;margin-left:14px;font:400 11.5px/1.5 "Space Mono",monospace;
+  color:var(--ink-2);white-space:nowrap}
 .riff{font:700 10px/1 "Saira Condensed",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--ink)}
-.pick{display:flex;gap:9px;margin-top:9px}
-.pick .opt{margin-top:0;text-align:center;font:700 13px/1 "Saira Condensed",sans-serif;
-  letter-spacing:.18em;text-transform:uppercase;padding:15px 10px}
-@media (max-width:560px){ .pick{flex-direction:column} }
+@media (max-width:560px){ .opt .price{float:none;display:block;margin:5px 0 0} }
 </style>
 </head>
 <body>
@@ -177,25 +170,21 @@ td a{color:var(--ink)}
   <header class="chassis">
     <span class="lamp" id="lamp" aria-hidden="true"></span>
     <div class="badge">
-      <div class="badge-name">Price Test</div>
-      <div class="badge-model">Model PT-12 &middot; Expensive or cheap</div>
+      <div class="badge-name">A/B Comparator</div>
+      <div class="badge-model">Model AB-12 &middot; Two guitars, one riff</div>
     </div>
     <div class="counter" id="counter">ROUND 01 / 12</div>
   </header>
 
   <section class="panel" id="s-test">
     <div class="leds" id="leds" aria-label="Progress"></div>
-    <div class="silk">The two instruments</div>
-    <div class="rule"></div>
-    <div class="lineup" id="lineup"></div>
-    <div style="height:20px"></div>
-    <div class="silk">Same riff on both &mdash; <span class="riff" id="riff"></span></div>
+    <div class="silk">Same riff, one guitar each &mdash; <span class="riff" id="riff"></span></div>
     <div class="rule"></div>
     <div id="clips"></div>
-    <div style="height:20px"></div>
-    <div class="silk">Which clip is the expensive one?</div>
+    <div style="height:22px"></div>
+    <div class="silk">Clip A is which guitar?</div>
     <div class="rule"></div>
-    <div class="pick" id="pick"></div>
+    <div id="pick"></div>
     <div id="reveal"></div>
   </section>
 
@@ -209,7 +198,7 @@ td a{color:var(--ink)}
     <div class="verdict" id="verdict"></div>
     <p id="stats"></p>
     <table>
-      <thead><tr><th></th><th>Riff</th><th>The expensive one</th><th class="tnum">Gap</th><th></th></tr></thead>
+      <thead><tr><th></th><th>Riff</th><th>The pairing</th><th class="tnum">Gap</th><th></th></tr></thead>
       <tbody id="tbody"></tbody>
     </table>
     <button class="btn" id="again">Run another test</button>
@@ -301,43 +290,42 @@ function renderRound(){
   $('#counter').textContent='ROUND '+String(idx+1).padStart(2,'0')+' / '+N_ROUNDS;
   renderLeds(); $('#reveal').innerHTML=''; $('#riff').textContent=r.riff;
 
-  $('#lineup').innerHTML=[r.hi,r.lo].map(g=>
-    '<div class="gtr"><span class="gtr-name"><b>'+g.b+'</b> '+g.m+'</span>'+
-    '<span class="gtr-price">'+money(g)+'</span></div>').join('');
-
   audios=[]; const cw=$('#clips'); cw.innerHTML='';
   const first = r.aIsExpensive ? r.hi : r.lo, second = r.aIsExpensive ? r.lo : r.hi;
   cw.append(clipRow('A', first.c[r.riff][0], first.c[r.riff][1]));
   cw.append(clipRow('B', second.c[r.riff][0], second.c[r.riff][1]));
 
   const pk=$('#pick'); pk.innerHTML='';
-  ['A','B'].forEach(letter=>{
+  [r.hi,r.lo].forEach((g,i)=>{
     const b=document.createElement('button');
-    b.className='opt'; b.type='button'; b.textContent='Clip '+letter;
-    b.onclick=()=>answer(letter,b); pk.appendChild(b);
+    b.className='opt'; b.type='button';
+    b.innerHTML='<span class="price">'+money(g)+'</span>'+
+                '<span class="brand">'+g.b+'</span> '+g.m;
+    b.onclick=()=>answer(i,b); pk.appendChild(b);
   });
 }
 
-function answer(letter, btn){
+function answer(i, btn){
   const r=rounds[idx];
-  const correctLetter = r.aIsExpensive ? 'A' : 'B';
-  const ok = letter===correctLetter;
-  picks[idx]={ok, gap:r.hi.eur-r.lo.eur, ratio:r.hi.eur/r.lo.eur};
-  [...$('#pick').children].forEach(b=>{
+  // buttons render expensive-first, so index 0 is right when clip A is the expensive one
+  const correctIdx = r.aIsExpensive ? 0 : 1;
+  const ok = i===correctIdx;
+  picks[idx]={ok, ratio:r.hi.eur/r.lo.eur};
+  [...$('#pick').children].forEach((b,j)=>{
     b.disabled=true;
-    const l=b.textContent.trim().slice(-1);
-    if(l===correctLetter){ b.classList.add('correct'); b.insertAdjacentHTML('beforeend','<span class="tag"> correct</span>'); }
+    if(j===correctIdx){ b.classList.add('correct'); b.insertAdjacentHTML('beforeend','<span class="tag"> was clip A</span>'); }
     else if(b===btn){ b.classList.add('wrong'); b.insertAdjacentHTML('beforeend','<span class="tag"> your pick</span>'); }
   });
   renderLeds();
+  const cA = r.aIsExpensive ? r.hi : r.lo, cB = r.aIsExpensive ? r.lo : r.hi;
+  const px = g => '€'+cur(g.eur)+' / $'+cur(g.usd);
   $('#reveal').innerHTML =
     '<div class="reveal"><h2>'+(ok?'Correct':'Other way round')+'</h2>'+
-    '<div style="margin:2px 0 8px">Clip '+correctLetter+' was the <strong>'+nm(r.hi)+'</strong> at '+
-    money(r.hi).replace('\u2248 ','')+'. The other was the <strong>'+nm(r.lo)+'</strong> at '+
-    money(r.lo).replace('\u2248 ','')+'.</div>'+
-    '<div class="spec">'+r.hi.st+' \u00b7 '+picks[idx].ratio.toFixed(1)+'\u00d7 price gap \u00b7 '+
-    '<a href="'+r.hi.url+'" target="_blank" rel="noopener">expensive \u2197</a> \u00b7 '+
-    '<a href="'+r.lo.url+'" target="_blank" rel="noopener">cheap \u2197</a></div>'+
+    '<div style="margin:2px 0 8px">Clip A was the <strong>'+nm(cA)+'</strong> ('+px(cA)+'), '+
+    'clip B the <strong>'+nm(cB)+'</strong> ('+px(cB)+').</div>'+
+    '<div class="spec">'+r.hi.st+' · '+picks[idx].ratio.toFixed(1)+'× apart · '+
+    '<a href="'+r.hi.url+'" target="_blank" rel="noopener">'+nm(r.hi)+' ↗</a> · '+
+    '<a href="'+r.lo.url+'" target="_blank" rel="noopener">'+nm(r.lo)+' ↗</a></div>'+
     '<button class="btn" id="next">'+(idx===N_ROUNDS-1?'See report':'Next pair')+'</button></div>';
   $('#next').onclick=()=>{ stopAll(null); lampSync(); idx++; idx<rounds.length?renderRound():showResult(); };
   $('#next').focus();
